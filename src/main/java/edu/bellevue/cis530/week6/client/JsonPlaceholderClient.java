@@ -4,6 +4,8 @@ package edu.bellevue.cis530.week6.client;
 import edu.bellevue.cis530.week6.dto.PostDto;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import edu.bellevue.cis530.week6.exception.ResourceNotFoundException;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +34,14 @@ public class JsonPlaceholderClient {
         return webClient.get()
                 .uri("/posts/{id}", id)
                 .retrieve()
+                .onStatus(
+                        status -> status.value() == 404,
+                        response -> Mono.error(
+                                new ResourceNotFoundException(
+                                        "Post with ID " + id + " was not found"
+                                )
+                        )
+                )
                 .bodyToMono(PostDto.class)
                 .block();
     }
