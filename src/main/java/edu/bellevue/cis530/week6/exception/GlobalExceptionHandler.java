@@ -40,11 +40,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleWebClientException(
             WebClientException ex) {
 
-        return handleApiClientException(
-                new ApiClientException(
-                        "Unable to retrieve data from JSONPlaceholder",
-                        ex
-                )
-        );
+        ex.printStackTrace();
+
+        String details = ex.getCause() != null
+                ? ex.getCause().toString()
+                : ex.toString();
+
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(Map.of(
+                        "status", 502,
+                        "error", "Bad Gateway",
+                        "message", "Unable to retrieve data from JSONPlaceholder",
+                        "details", details
+                ));
     }
 }
